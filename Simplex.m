@@ -1,5 +1,7 @@
 format long
 %Insert any LP in SEF below:
+%The program solves the LP, assuming the LP is not infeasible (2nd Phase
+%Simplex)
 A = zeros(5,7);
 A(1,:) = [-1 1 1 0 0 0 0];
 A(2,:) = [-0.5 1 0 1 0 0 0];
@@ -14,7 +16,7 @@ basis = [];
 basic_sols = [];
 [basis, basic_sols] = SimplexAlgo(c,d,A,b,B,basis,basic_sols);
 
-%Visualization part:  (only appicable if the number of variables is <=3)
+%Visualization part:  (only applicable if the number of variables is <=3)
 %Knowing the feasible basic solutions obtained in each iteration of the
 %Simplex and knowing the polyhedral form of the LP, we can find the
 %feasible solutions in the polyhedron related to those basic solutions at
@@ -31,27 +33,25 @@ P(4,:) = [1 1];
 P(5,:) = [1 0];
 b = transpose([0 3 0 7 5.7]);
 figure
-for i=1:size(P,1)
-    if(P(i,2) ~= 0)
-        plot([0 P(i,2)],[b(i,1) b(i,1)-P(i,1)], "blue");
-    else
-        plot([b(i,1)/P(i,1) b(i,1)/P(i,1)],[0 1], "blue");
-    end
-    hold on;
-end
 xlabel("x1");
 ylabel("x2");
 title("Feasible region");
-% grid on;
-% hold on;
-% h = scatter(basic_sols(1,1),basic_sols(2,1),"red","*");
-% hold on;
-% for j=2:size(basic_sols,2)
-%     pause(1);
-%     h.XData = basic_sols(1,j);
-%     h.YData = basic_sols(2,j);
-%     hold on;
-% end
+A=[1,-1;0.5,-1;-0.5,1;-1,-1];
+b=transpose([0,-3,0,-7]);
+lb = transpose([-inf -inf]);
+rb = transpose([5.7 inf]);
+plotregion(A,b,lb,rb,[0.7,0.2,0.3]);
+axis equal
+grid on;
+hold on;
+h = scatter(basic_sols(1,1),basic_sols(2,1),"red","*");
+hold on;
+for j=2:size(basic_sols,2)
+    pause(0.5);
+    h.XData = basic_sols(1,j);
+    h.YData = basic_sols(2,j);
+    hold on;
+end
 
 function [mem_b,mem_s] = SimplexAlgo(c,d,A,b,B, mem_b, mem_s)
 %% input details:
@@ -86,7 +86,7 @@ A = A_binv*A;
 b = A_binv*b;
 % After this, the LP is in canonical form for feasible B.
 fprintf("Basis : \n");
-disp(B)
+disp(B);
 mem_b(:,size(mem_b,2)+1) = transpose(B); %update the current basic solution
 fprintf("Basic solution : \n");
 bsol = zeros(size(A,2),1); %basic solution of current basis B
@@ -124,26 +124,26 @@ else
         disp("The LP is unbounded with certificate : ");
     else
         % up to this point, the optimality and unboundedness tests have failed.
-        %Then, we can make another iteration of Simplex , with the new basis
-        ratios = b./A_k; %get the entrywise ratios of b with respect to the kth column of A
-        % Now we use the ratio test and following Blands Rule, the element leaving
-        % the basis will be the first variable index with minimum ratio (among
-        % those positive ones)
-        r = 1; %index of variable that leaves the basis
-        min_ratio = inf; %min ratio value initialized to inf
-        for i=1:size(ratios,1)
-            if((ratios(i,1) > 0 == 1) && ~isinf(ratios(i,1)) && (ratios(i,1) < min_ratio) ) 
-                %the < is important rather than <= (Blands Rule)
-                % if there is some division by 0 matlab returns inf...
-                min_ratio = ratios(i,1);
-                r = i;
+        %Then, we can make another iteration of Simplex , finding a new
+        %basis whose basic solution will have a value greater or equal than
+        %that of the current basic solution. The equal case is called a
+        %degenerate case. Also, when determining the entering and exitting variables we
+        %use Bland's Rule which is proven to avoid cycling.
+        min_ratio = inf;
+        for i=1:size(A_k,1)
+            if(A_k(i,1) > 0)
+                ratio = (b(i,1))/(A_k(i,1));
+                if (ratio < min_ratio)
+                    r = i;
+                    min_ratio = ratio;
+                end
             end
         end
-       
+        fprintf("k = %d enters basis, l = %d leaves basis\n",k,B(1,r));
         %update basis for next iteration:
-        B(1,r) = k; %k enters and r leaves
+        B(1,r) = k; 
         B = sort(B);
-%         %Next iteration
+        %Next iteration
         [mem_b, mem_s]=SimplexAlgo(c,d,A,b,B, mem_b, mem_s);
      end
  end
@@ -170,5 +170,6 @@ function [v_b, v_n ] = sub_divide(v, B) %given a column and row of indices B, re
        j = j +1;
    end
 end
+
 
 
