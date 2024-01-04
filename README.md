@@ -1,2 +1,5 @@
 # The-Simplex-Method
 Implementation of the Simplex Method to solve any linear program given as input in Standard Equality form. The output tells the user whether the program is infeasible, unbounded or optimal and returns the respective certificates for each case.
+
+# Visual Example:
+In order to illustrate the geoemtrical meaning of the algorithm while showing the general functionality of this project, I applied the Simplex Algorithm to an LP whose feasible region is a regular polygon with n sides. As the gif below shows, each iteration of the simplex method computes a new feasible solution which is not coincidentially an extreme point of the ngon. This is in fact always the case: Basic feasible solutions are extreme points of the polyhedra and any optimal LP attains its optimal value at some extreme point(s). For this case, the objective function is f(x,y) = x+y and the program succesfully returns the optimal solution accordingly (it is the last extreme point colored in blue in the animation).
