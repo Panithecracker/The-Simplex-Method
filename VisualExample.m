@@ -12,21 +12,6 @@ xlabel("x1");
 ylabel("x2");
 title("Feasible region plot");
 hold on;
-% 
-% %testing that the equations are correct for the feasible region
-% x = linspace(150,250,1000);
-% y = zeros(1,length(x));
-% for l=1:n
-%     for i=1:1000
-%         y(i) = (-1)*((P(l,1))/(P(l,2)))*x(i) + (b(l))/(P(l,2));
-%     end
-%     plot(x,y, "blue");
-%     y = [];
-%     hold on;
-% end
-% axis equal
-
-
 
 plotregion(-P,-b,[0 0], [inf inf], [0.8 1 0.9]); %times -1 to express it as -Px >=-b for the format of plotregion command
 grid on;
